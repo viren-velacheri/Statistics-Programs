@@ -1,0 +1,111 @@
+movies <- read.csv(file.choose())
+attach(movies)
+plot(movies)
+
+par(family = "serif", cex.main = 2, cex.lab = 2, 
+    cex.axis = 2, mar = c(5, 5, 4, 2))
+
+## USGrossMil is the response variable.
+par(mfrow = c(2, 2))
+hist(USGrossMil)
+hist(BudgetMil)
+hist(RunTime)
+hist(Stars)
+par(mfrow = c(1,1))
+
+## BudgetMil
+Budlm <- lm(USGrossMil ~ BudgetMil)
+summary(Budlm)
+par(mfrow=c(1,2))
+plot(BudgetMil, USGrossMil, pch=19, 
+     main = "2005 Movies\nUS Gross based on Budget",
+     xlab = "Budget (in millions)", 
+     ylab = "US Gross (in millions)")
+BudRes <- resid(Budlm)
+plot(fitted(Budlm), BudRes)
+
+## RunTime
+Timelm <- lm(USGrossMil ~ RunTime)
+summary(Timelm)
+par(mfrow=c(1,2))
+plot(RunTime, USGrossMil, pch=19, 
+     main = "2005 Movies\nUS Gross based on Length of Movie",
+     xlab = "Length of Movie (minutes)", 
+     ylab = "US Gross (in millions)")
+TimeRes <- resid(Timelm)
+plot(fitted(Timelm), TimeRes)
+
+## Stars
+Starslm <- lm(USGrossMil ~ Stars)
+summary(Starslm)
+par(mfrow=c(1,2))
+plot(Stars, USGrossMil, pch=19, 
+     main = "2005 Movies\nUS Gross based on Stars",
+     xlab = "Stars", 
+     ylab = "US Gross (in millions)")
+StarsRes <- resid(Starslm)
+plot(fitted(Starslm), StarsRes)
+par(mfrow=c(1,1))
+
+## BudgetMil and Stars
+BudStarslm <- lm(USGrossMil ~ BudgetMil + Stars)
+summary(BudStarslm)
+BudStarsRes <- resid(BudStarslm)
+plot(fitted(BudStarslm), resid(BudStarslm))
+summary(lm(BudgetMil ~ Stars))
+plot(Stars, BudgetMil)
+
+## BudgetMil and Stars with interaction
+BudStarsIntlm <- lm(USGrossMil ~ BudgetMil * Stars)
+summary(BudStarsIntlm)
+BudStarsIntRes <- resid(BudStarsIntlm)
+plot(fitted(BudStarsIntlm), resid(BudStarsIntlm))
+
+## BudgetMil and RunTime
+BudTimelm <- lm(USGrossMil ~ BudgetMil + RunTime)
+summary(BudTimelm)
+BudTimeRes <- resid(BudTimelm)
+plot(fitted(BudTimelm), resid(BudTimelm))
+summary(lm(BudgetMil ~ RunTime))
+plot(RunTime, BudgetMil)
+
+## BudgetMil and RunTime with interaction
+BudTimeIntlm <- lm(USGrossMil ~ BudgetMil * RunTime)
+summary(BudTimeIntlm)
+BudTimeIntRes <- resid(BudTimeIntlm)
+plot(fitted(BudTimeIntlm), resid(BudTimeIntlm))
+
+## BudgetMil, Stars and RunTime
+BudStarsTimelm <- 
+  lm(USGrossMil ~ BudgetMil + Stars + RunTime)
+summary(BudStarsTimelm)
+plot(fitted(BudStarsTimelm), resid(BudStarsTimelm))
+
+## Stars and RunTime
+StarsTimelm <- lm(USGrossMil ~ Stars + RunTime)
+summary(StarsTimelm)
+plot(fitted(StarsTimelm), resid(StarsTimelm))
+
+## Pairwise r-squared
+STlm <- lm(Stars ~ RunTime)
+summary(STlm)
+BSlm <- lm(BudgetMil ~ Stars)
+summary(BSlm)
+BTlm <- lm(BudgetMil ~ RunTime)
+summary(BTlm)
+
+
+### Best Subsets From Guided Investigations Second Course p. 72 problem 5
+install.packages("leaps")
+library(leaps)
+
+X <- cbind(BudgetMil, Stars, RunTime)
+best.lm <- leaps(X, USGrossMil, 
+                 method = "Cp")
+cbind(best.lm$Cp, best.lm$which)
+
+bestRsqadj.lm <- leaps(X, USGrossMil, 
+                       method = "adjr2")
+cbind(bestRsqadj.lm$adjr2, bestRsqadj.lm$which)
+
+sqrt(.3921)
